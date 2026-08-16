@@ -151,4 +151,24 @@
   input[type="number"] {
     -moz-appearance: textfield;
   }
+
+  select {
+    color: var(--text);
+    background-color: var(--input-bg);
+  }
+  select option {
+    color: #1a1208;
+    background-color: #ffffff;
+  }
+  select[multiple] option,
+  select[size] option {
+    color: var(--text);
+    background-color: var(--bg-3);
+  }
+
+  .dark select,
+  :root.dark select,
+  select {
+    color-scheme: light dark;
+  }
 }
