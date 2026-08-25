@@ -56,7 +56,7 @@ export function About() {
             <h2 className="font-[Playfair_Display] text-[clamp(32px,4vw,52px)] font-bold leading-[1.15] mb-6">
               Rooted in Heritage,<br /><em className="italic text-[var(--gold-light)]">Elevated by Design</em>
             </h2>
-            <p className="text-[var(--text-muted)] leading-relaxed mb-5">LUM NG is a premium unisex fabric store founded by Oluwapelumi Adeboye, based in Ilorin, Kwara State. We deal in Lace, Ankara, Senator materials, Guinea Brocade, Embroidered Alhaji caps, Bonnets (all types), and Baby/Children's wears.</p>
+            <p className="text-[var(--text-muted)] leading-relaxed mb-5">LUM NG is a premium unisex fabric store founded by Oluwapelumi Adeboye, with flagship locations in Ilorin, Kwara State and Ibadan, Oyo State. We deal in Lace, Ankara, Senator materials, Guinea Brocade, Embroidered Alhaji caps, Bonnets (all types), and Baby/Children's wears.</p>
             <p className="text-[var(--text-muted)] leading-relaxed mb-10">Whether you're dressing for celebration, culture, or commerce — we carry what you need, in the quantities you require.</p>
             <div className="grid grid-cols-3 gap-6 py-8 border-t border-b border-[var(--border)] mb-10">
               {[['8+','Product Types'],['500+','Happy Customers'],['Bulk','Orders Welcome']].map(([n,l]) => (
@@ -260,7 +260,7 @@ export function Contact() {
             <h2 className="font-[Playfair_Display] text-[clamp(32px,4vw,52px)] font-bold mb-6">Get In Touch</h2>
             <p className="text-[var(--text-muted)] leading-relaxed mb-8">Have questions about bulk orders or availability? Reach us on WhatsApp or send us an email — we'd love to hear from you.</p>
             <div className="flex flex-col gap-5">
-              {[['📞', '+2349074112695'], ['✉️', 'lumngfabrics@gmail.com'], ['📍', 'Ilorin, Kwara State'], ['📱', '@lum_ng on Instagram']].map(([icon, val]) => (
+              {[['📞', '+2349074112695'], ['✉️', 'lumngfabrics@gmail.com'], ['📍', 'Ilorin, Kwara State & Ibadan, Oyo State'], ['📱', '@lum_ng on Instagram']].map(([icon, val]) => (
                 <div key={val} className="flex items-center gap-4 text-[var(--text-dim)]">{icon} {val}</div>
               ))}
             </div>

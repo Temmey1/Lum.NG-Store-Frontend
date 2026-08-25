@@ -15,7 +15,7 @@ export default function Footer() {
               <div className="font-[Playfair_Display] text-2xl font-black tracking-widest" style={{ background: 'linear-gradient(135deg, var(--text), var(--gold-light))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>LUM NG</div>
             </div>
             <p className="text-[var(--text-muted)] text-sm leading-relaxed max-w-[280px] mb-6">
-              Premium unisex fabric store — Ilorin, Kwara State. Look classy to your taste.
+              Premium unisex fabric store — Ilorin, Kwara State & Ibadan, Oyo State. Look classy to your taste.
             </p>
             <div className="flex gap-4">
               {[Globe, Phone, Share2].map((Icon, i) => (

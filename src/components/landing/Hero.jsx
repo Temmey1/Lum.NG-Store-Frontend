@@ -72,7 +72,7 @@ export default function Hero() {
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }}
           className="text-[11px] tracking-[0.25em] uppercase text-[var(--gold)] font-semibold mb-6"
         >
-          Unisex Fabric Store · Ilorin, Kwara
+          Unisex Fabric Store · Ilorin, Kwara & Ibadan, Oyo
         </motion.div>
 
         <motion.h1

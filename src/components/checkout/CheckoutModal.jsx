@@ -243,7 +243,7 @@ export default function CheckoutModal() {
                         <MapPin size={24} className="text-[var(--gold)] flex-shrink-0 mt-1" />
                         <div>
                           <strong className="block text-sm mb-1">LUMNG Store</strong>
-                          <p className="text-[13px] text-[var(--text-muted)]">Ilorin, Kwara State. Open Mon–Sat 8am–7pm.</p>
+                          <p className="text-[13px] text-[var(--text-muted)]">Ilorin, Kwara State & Ibadan, Oyo State.</p>
                           <p className="text-[12px] text-[var(--gold)] mt-1">You'll receive a pickup-ready notification via WhatsApp: +2349074112695</p>
                         </div>
                       </div>
