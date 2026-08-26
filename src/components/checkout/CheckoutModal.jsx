@@ -1,12 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Truck, MapPin, CheckCircle } from 'lucide-react';
+import { X, Truck, MapPin, CheckCircle, MessageCircle, Copy, ExternalLink } from 'lucide-react';
 import { useUIStore, useCartStore, useSessionStore, useProductsStore } from '../../store';
 import { useCartRecovery } from '../../hooks/useCartRecovery';
 import { ordersApi } from '../../api/index';
 import { formatPrice, NIGERIAN_STATES } from '../../data/products';
+import toast from 'react-hot-toast';
 
 const STEPS = ['Your Details', 'Delivery', 'Review'];
+
+// Vendor contact for the post-order handoff message. No payment integration
+// exists yet (see the note in the success screen) — this is purely a manual
+// "customer notifies vendor" flow for now, built so a real payment step can
+// slot in later without touching this.
+const VENDOR_WHATSAPP = (import.meta.env.VITE_VENDOR_WHATSAPP || '+2349074112695').replace(/[^\d]/g, '');
+const VENDOR_INSTAGRAM = import.meta.env.VITE_VENDOR_INSTAGRAM || 'lum_ng';
+
+// lucide-react dropped brand icons — small inline glyph instead of a dependency
+function InstagramIcon({ size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+    </svg>
+  );
+}
 
 export default function CheckoutModal() {
   const { checkoutOpen, closeCheckout } = useUIStore();
@@ -17,8 +36,11 @@ export default function CheckoutModal() {
   const { attachEmail, markRecovered, sessionId } = useCartRecovery();
   const [step, setStep] = useState(0);
   const [orderRef, setOrderRef] = useState('');
+  const [orderToken, setOrderToken] = useState('');
   const [placing, setPlacing] = useState(false);
   const [orderError, setOrderError] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [orderSnapshot, setOrderSnapshot] = useState(null);
   const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', state: '', landmark: '', pickupDate: '' });
 
   // Restore session on open
@@ -90,9 +112,24 @@ export default function CheckoutModal() {
     setOrderError('');
     try {
       const { data } = await ordersApi.create(orderPayload);
+      // Snapshot for the success screen's WhatsApp/IG message — items/form
+      // will be gone (cart cleared) or stale by the time that renders.
+      setOrderSnapshot({
+        items: items.map(item => {
+          const p = products.find(x => x.id === item.id);
+          const price = p ? (item.qty >= (p.bulkMin || Infinity) ? p.bulkPrice : p.price) : 0;
+          return { name: p?.name || 'Item', qty: item.qty, unit: p?.unit || '', price };
+        }),
+        customer: { ...form },
+        delivery: deliveryMode,
+        subtotal,
+        deliveryFee,
+        total: subtotal + deliveryFee,
+      });
       markRecovered(); // tell backend the cart was converted
       clearCart();
       setOrderRef(data.ref);
+      setOrderToken(data.publicToken || '');
       setStep(3);
     } catch (err) {
       // Don't fake a success screen if the order wasn't actually saved —
@@ -108,6 +145,65 @@ export default function CheckoutModal() {
   };
 
   const inputCls = 'bg-[var(--input-bg)] border border-[var(--border)] rounded px-4 py-3 text-[var(--text)] text-[14px] w-full focus:outline-none focus:border-[rgba(201,168,76,0.4)] focus:shadow-[0_0_0_3px_rgba(201,168,76,0.1)] placeholder:text-[var(--text-ghost)] transition-all';
+
+  /** Structured, human-readable order summary sent to the vendor via
+   * WhatsApp/Instagram. No payment info — that's intentionally absent until
+   * a real payment integration exists; this is a manual handoff in the
+   * meantime, not a replacement for one. */
+  const buildOrderMessage = () => {
+    if (!orderSnapshot) return '';
+    const lines = [
+      `New order from LUM NG — ${orderRef}`,
+      '',
+      ...orderSnapshot.items.map(i => `• ${i.name} × ${i.qty} (${i.unit}) — ${formatPrice(i.price * i.qty)}`),
+      '',
+      `Subtotal: ${formatPrice(orderSnapshot.subtotal)}`,
+      `${orderSnapshot.delivery === 'pickup' ? 'Pickup' : 'Delivery'}: ${orderSnapshot.deliveryFee === 0 ? 'Free' : formatPrice(orderSnapshot.deliveryFee)}`,
+      `Total: ${formatPrice(orderSnapshot.total)}`,
+      '',
+      `Customer: ${orderSnapshot.customer.name}`,
+      `Phone: ${orderSnapshot.customer.phone}`,
+      `Email: ${orderSnapshot.customer.email}`,
+    ];
+    if (orderSnapshot.delivery === 'delivery' && orderSnapshot.customer.address) {
+      lines.push(`Address: ${orderSnapshot.customer.address}${orderSnapshot.customer.state ? `, ${orderSnapshot.customer.state}` : ''}`);
+      if (orderSnapshot.customer.landmark) lines.push(`Landmark: ${orderSnapshot.customer.landmark}`);
+    }
+    if (orderSnapshot.delivery === 'pickup' && orderSnapshot.customer.pickupDate) {
+      lines.push(`Preferred pickup date: ${orderSnapshot.customer.pickupDate}`);
+    }
+    lines.push('', `View order: ${window.location.origin}/order/${orderToken}`);
+    lines.push('', '(No payment made yet — to be confirmed manually.)');
+    return lines.join('\n');
+  };
+
+  const handleWhatsAppShare = () => {
+    const text = encodeURIComponent(buildOrderMessage());
+    window.open(`https://wa.me/${VENDOR_WHATSAPP}?text=${text}`, '_blank', 'noopener');
+  };
+
+  const handleInstagramShare = async () => {
+    try {
+      await navigator.clipboard.writeText(buildOrderMessage());
+      toast.success('Order details copied — paste them into the chat', {
+        style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(201,168,76,0.3)' },
+      });
+    } catch {
+      // Clipboard can fail (permissions/older browsers) — the IG thread
+      // still opens either way, just without the auto-copy convenience.
+    }
+    window.open(`https://ig.me/m/${VENDOR_INSTAGRAM}`, '_blank', 'noopener');
+  };
+
+  const handleCopyMessage = async () => {
+    try {
+      await navigator.clipboard.writeText(buildOrderMessage());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error('Could not copy — select and copy the text manually');
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -243,7 +339,7 @@ export default function CheckoutModal() {
                         <MapPin size={24} className="text-[var(--gold)] flex-shrink-0 mt-1" />
                         <div>
                           <strong className="block text-sm mb-1">LUMNG Store</strong>
-                          <p className="text-[13px] text-[var(--text-muted)]">Ilorin, Kwara State & Ibadan, Oyo State.</p>
+                          <p className="text-[13px] text-[var(--text-muted)]">Ilorin, Kwara State. Open Mon–Sat 8am–7pm.</p>
                           <p className="text-[12px] text-[var(--gold)] mt-1">You'll receive a pickup-ready notification via WhatsApp: +2349074112695</p>
                         </div>
                       </div>
@@ -332,11 +428,51 @@ export default function CheckoutModal() {
                   </motion.div>
                   <h2 className="font-[Playfair_Display] text-3xl font-bold">Order Placed! 🎉</h2>
                   <p className="text-[var(--text-muted)] leading-relaxed max-w-sm">
-                    Thank you for your order. We'll reach out via WhatsApp or email within <strong className="text-[var(--text-dim)]">24 hours</strong> to confirm and arrange payment.
+                    Thank you for your order. No payment has been taken yet — we'll reach out via WhatsApp or email within <strong className="text-[var(--text-dim)]">24 hours</strong> to confirm and arrange payment.
                   </p>
                   <div className="font-mono text-[16px] text-[var(--gold-light)] bg-[var(--bg-3)] border border-[rgba(201,168,76,0.3)] rounded-lg px-6 py-3 tracking-widest">
                     {orderRef}
                   </div>
+
+                  {orderToken && (
+                    <div className="w-full max-w-sm flex flex-col gap-3">
+                      <p className="text-[12px] text-[var(--text-ghost)] -mb-1">
+                        Want to reach us right away? Send your order details directly:
+                      </p>
+                      <button
+                        onClick={handleWhatsAppShare}
+                        className="w-full bg-[#25D366] text-black font-bold uppercase tracking-wider text-[13px] py-3 rounded flex items-center justify-center gap-2 hover:-translate-y-0.5 transition-all"
+                      >
+                        <MessageCircle size={16} /> Send via WhatsApp
+                      </button>
+                      <button
+                        onClick={handleInstagramShare}
+                        className="w-full bg-gradient-to-br from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white font-bold uppercase tracking-wider text-[13px] py-3 rounded flex items-center justify-center gap-2 hover:-translate-y-0.5 transition-all"
+                      >
+                        <InstagramIcon size={16} /> Send via Instagram DM
+                      </button>
+                      <p className="text-[11px] text-[var(--text-ghost)]">
+                        Instagram doesn't support pre-filled messages — we'll copy your order details to your clipboard first, then open the chat so you can paste them in.
+                      </p>
+
+                      <div className="flex gap-2 mt-1">
+                        <button
+                          onClick={handleCopyMessage}
+                          className="flex-1 border border-[var(--border)] text-[var(--text-muted)] text-[12px] uppercase tracking-wider py-2.5 rounded flex items-center justify-center gap-1.5 hover:border-white/20 transition-all"
+                        >
+                          <Copy size={13} /> {copied ? 'Copied!' : 'Copy Message'}
+                        </button>
+                        <a
+                          href={`${window.location.origin}/order/${orderToken}`}
+                          target="_blank" rel="noreferrer"
+                          className="flex-1 border border-[var(--border)] text-[var(--text-muted)] text-[12px] uppercase tracking-wider py-2.5 rounded flex items-center justify-center gap-1.5 hover:border-white/20 transition-all"
+                        >
+                          <ExternalLink size={13} /> View Order
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
                   <button
                     onClick={closeCheckout}
                     className="mt-2 bg-gradient-to-br from-[#c9a84c] to-[#e8c97a] text-black font-bold uppercase tracking-wider text-[13px] px-10 py-3.5 rounded hover:-translate-y-0.5 transition-all"

@@ -1,11 +1,21 @@
 import axios from 'axios';
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export const api = axios.create({
   baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 });
+
+/** Product images are stored as backend-relative paths (e.g. "/uploads/xyz.jpg").
+ * This resolves them to a full URL against the backend. Already-absolute
+ * URLs pass through unchanged. Returns null if there's no image, so callers
+ * can fall back to the CSS gradient pattern. */
+export function resolveImageUrl(url) {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;
+  return `${BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+}
 
 // Attach JWT token to every request if present
 api.interceptors.request.use((config) => {
@@ -48,6 +58,8 @@ export const ordersApi = {
   create: (data) => api.post('/orders', data),
   updateStatus: (ref, status) => api.patch(`/orders/${ref}/status`, { status }),
   clearAll: () => api.delete('/orders'),
+  // Public, no auth — powers the "view order" page shared via WhatsApp/IG
+  trackPublic: (token) => api.get(`/orders/track/${token}`),
 };
 
 export const authApi = {

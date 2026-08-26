@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import LandingPage from './pages/LandingPage';
 import ShopPage from './pages/ShopPage';
+import OrderStatusPage from './pages/OrderStatusPage';
 import { useThemeStore, useProductsStore } from './store';
 import './styles/globals.css';
 
@@ -36,6 +37,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/shop" element={<ShopPage />} />
+        <Route path="/order/:token" element={<OrderStatusPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

@@ -4,6 +4,7 @@ import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { useUIStore, useCartStore } from '../../store';
 import { formatPrice } from '../../data/products';
 import toast from 'react-hot-toast';
+import ProductImage from './ProductImage';
 
 export default function ProductModal() {
   const { modalProduct, closeModal, openCart } = useUIStore();
@@ -60,10 +61,9 @@ export default function ProductModal() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2">
             {/* Swatch */}
-            <div
-              className="h-[280px] sm:h-full min-h-[280px] rounded-tl-xl rounded-tr-xl sm:rounded-tr-none sm:rounded-bl-xl"
-              style={{ background: modalProduct.pattern }}
-            />
+            <div className="h-[280px] sm:h-full min-h-[280px] rounded-tl-xl rounded-tr-xl sm:rounded-tr-none sm:rounded-bl-xl overflow-hidden">
+              <ProductImage product={modalProduct} />
+            </div>
 
             {/* Info */}
             <div className="p-9">

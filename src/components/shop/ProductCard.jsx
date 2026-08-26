@@ -4,6 +4,7 @@ import { Plus, Search } from 'lucide-react';
 import { formatPrice } from '../../data/products';
 import { useCartStore, useUIStore } from '../../store';
 import toast from 'react-hot-toast';
+import ProductImage from './ProductImage';
 
 export default function ProductCard({ product, index = 0 }) {
   const { addItem } = useCartStore();
@@ -32,9 +33,9 @@ export default function ProductCard({ product, index = 0 }) {
         className="relative h-[220px] cursor-pointer overflow-hidden"
         onClick={() => openModal(product)}
       >
-        <div
-          className="w-full h-full transition-transform duration-700 group-hover:scale-[1.04]"
-          style={{ background: product.pattern }}
+        <ProductImage
+          product={product}
+          className="transition-transform duration-700 group-hover:scale-[1.04]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
 
