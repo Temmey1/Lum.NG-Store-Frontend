@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
-import { useUIStore, useCartStore } from '../../store';
+import { useUIStore, useCartStore, useProductsStore } from '../../store';
 import { formatPrice } from '../../data/products';
 import toast from 'react-hot-toast';
 import ProductImage from './ProductImage';
 
 export default function ProductModal() {
-  const { modalProduct, closeModal, openCart } = useUIStore();
+  const { modalProductId, closeModal, openCart } = useUIStore();
   const { addItem } = useCartStore();
+  const modalProduct = useProductsStore(s => s.products.find(p => p.id === modalProductId) || null);
   const [qty, setQty] = useState(1);
 
   useEffect(() => {

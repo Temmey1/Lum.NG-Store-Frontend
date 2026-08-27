@@ -1,16 +1,17 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { DEFAULT_PRODUCTS } from '../data/products';
 import { productsApi } from '../api/index';
 
-// ===== PRODUCTS STORE (live data from the backend) =====
-// Seeds with the static DEFAULT_PRODUCTS so the UI has something to render
-// on first paint / while offline, then replaces it with real data from the
-// API as soon as it loads. This is the single source of truth for product
-// data across the storefront — cart pricing, checkout, and the shop page
-// all read from here instead of the static file.
+// ===== PRODUCTS STORE (live data from the backend — no mock/static data) =====
+// Starts empty. The UI shows an explicit loading state (see `loaded`/`loading`
+// below) until real data arrives — it never falls back to fake products, so
+// there's no risk of a customer seeing placeholder data mistaken for real
+// inventory, and no stale-snapshot bugs from a "seed" array silently existing
+// in the codebase. This is the single source of truth for product data
+// across the storefront — cart pricing, checkout, and the shop page all read
+// from here.
 export const useProductsStore = create((set, get) => ({
-  products: DEFAULT_PRODUCTS,
+  products: [],
   loaded: false,
   loading: false,
   error: null,
@@ -22,7 +23,6 @@ export const useProductsStore = create((set, get) => ({
       const { data } = await productsApi.getAll();
       set({ products: data.products ?? [], loaded: true, loading: false });
     } catch (err) {
-      // Keep the static fallback list on screen if the API is unreachable
       set({ loading: false, error: err.message || 'Failed to load products' });
     }
   },
@@ -88,7 +88,7 @@ export const useSessionStore = create(
 export const useUIStore = create((set) => ({
   cartOpen: false,
   mobileNavOpen: false,
-  modalProduct: null,
+  modalProductId: null,
   checkoutOpen: false,
 
   openCart: () => set({ cartOpen: true }),
@@ -98,8 +98,14 @@ export const useUIStore = create((set) => ({
   openMobileNav: () => set({ mobileNavOpen: true }),
   closeMobileNav: () => set({ mobileNavOpen: false }),
 
-  openModal: (product) => set({ modalProduct: product }),
-  closeModal: () => set({ modalProduct: null }),
+  // Takes a product ID (not the object) so the modal always re-derives the
+  // freshest product data from useProductsStore on every render, instead of
+  // freezing whatever object existed at the moment of the click. Previously,
+  // clicking a product before fetchProducts() resolved (e.g. during a slow
+  // Render cold-start) could permanently show stale/placeholder data even
+  // after the real data loaded, since the old object reference never updated.
+  openModal: (productId) => set({ modalProductId: productId }),
+  closeModal: () => set({ modalProductId: null }),
 
   openCheckout: () => set({ checkoutOpen: true, cartOpen: false }),
   closeCheckout: () => set({ checkoutOpen: false }),

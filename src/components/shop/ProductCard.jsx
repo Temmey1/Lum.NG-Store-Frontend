@@ -31,7 +31,7 @@ export default function ProductCard({ product, index = 0 }) {
       {/* Image area */}
       <div
         className="relative h-[220px] cursor-pointer overflow-hidden"
-        onClick={() => openModal(product)}
+        onClick={() => openModal(product.id)}
       >
         <ProductImage
           product={product}
@@ -91,7 +91,7 @@ export default function ProductCard({ product, index = 0 }) {
             {product.inStock ? 'Add to Cart' : 'Out of Stock'}
           </button>
           <button
-            onClick={() => openModal(product)}
+            onClick={() => openModal(product.id)}
             className="border border-[var(--border)] rounded py-2.5 px-3 text-[var(--text-muted)] hover:border-[var(--border-hover)] hover:text-[var(--gold-light)] transition-all"
           >
             <Search size={15} />
