@@ -1,7 +1,7 @@
 import React from 'react';
 import { CATEGORIES } from '../../data/products';
 
-export default function ShopFilters({ category, setCategory, onlyInStock, setOnlyInStock, sort, setSort }) {
+export default function ShopFilters({ category, setCategory, sort, setSort }) {
   const inputCls = 'w-full bg-[var(--input-bg)] border border-[var(--border)] rounded px-3.5 py-2.5 text-[var(--text-muted)] text-sm focus:outline-none focus:border-[var(--gold-dim)] cursor-pointer';
 
   return (
@@ -25,26 +25,6 @@ export default function ShopFilters({ category, setCategory, onlyInStock, setOnl
             </li>
           ))}
         </ul>
-      </div>
-
-      {/* Availability */}
-      <div>
-        <h3 className="text-[11px] tracking-[0.15em] uppercase text-[var(--gold)] mb-4">Availability</h3>
-        <label className="flex items-center gap-3 cursor-pointer group">
-          <div
-            onClick={() => setOnlyInStock(!onlyInStock)}
-            className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${
-              onlyInStock ? 'bg-[var(--gold)] border-[var(--gold)]' : 'border-[var(--border)] group-hover:border-[var(--text-muted)]'
-            }`}
-          >
-            {onlyInStock && (
-              <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-                <polyline points="2 6 5 9 10 3" stroke="var(--bg)" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            )}
-          </div>
-          <span className="text-sm text-[var(--text-muted)] group-hover:text-[var(--text)] transition-colors">In Stock Only</span>
-        </label>
       </div>
 
       {/* Sort */}

@@ -83,8 +83,9 @@ export function FabricsShowcase() {
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const { products } = useProductsStore();
   const featured = (() => {
-    const flagged = products.filter(p => p.featured);
-    return (flagged.length ? flagged : products).slice(0, 6);
+    const inStock = products.filter(p => p.inStock);
+    const flagged = inStock.filter(p => p.featured);
+    return (flagged.length ? flagged : inStock).slice(0, 6);
   })();
 
   return (

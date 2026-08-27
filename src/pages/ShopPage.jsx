@@ -18,7 +18,6 @@ export default function ShopPage() {
   useCartRecovery(); // handles ?restore= token + syncs cart to backend
   const { products, loaded, loading, fetchProducts } = useProductsStore();
   const [category, setCategory] = useState(searchParams.get('cat') || 'all');
-  const [onlyInStock, setOnlyInStock] = useState(false);
   const [sort, setSort] = useState('default');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -34,14 +33,13 @@ export default function ShopPage() {
   }, []);
 
   const filtered = useMemo(() => {
-    let list = [...products];
+    let list = products.filter(p => p.inStock);
     if (category !== 'all') list = list.filter(p => p.category === category);
-    if (onlyInStock) list = list.filter(p => p.inStock);
     if (sort === 'price-asc') list.sort((a, b) => a.price - b.price);
     else if (sort === 'price-desc') list.sort((a, b) => b.price - a.price);
     else if (sort === 'name') list.sort((a, b) => a.name.localeCompare(b.name));
     return list;
-  }, [category, onlyInStock, sort]);
+  }, [products, category, sort]);
 
   return (
     <div className="min-h-screen bg-[var(--bg)]">
@@ -68,7 +66,6 @@ export default function ShopPage() {
         <div className="hidden lg:block">
           <ShopFilters
             category={category} setCategory={setCategory}
-            onlyInStock={onlyInStock} setOnlyInStock={setOnlyInStock}
             sort={sort} setSort={setSort}
           />
         </div>
@@ -84,7 +81,6 @@ export default function ShopPage() {
               </div>
               <ShopFilters
                 category={category} setCategory={(c) => { setCategory(c); setSidebarOpen(false); }}
-                onlyInStock={onlyInStock} setOnlyInStock={setOnlyInStock}
                 sort={sort} setSort={setSort}
               />
             </div>
@@ -118,7 +114,7 @@ export default function ShopPage() {
               <p className="font-[Playfair_Display] text-2xl text-[var(--text-ghost)] mb-3">No fabrics found</p>
               <p className="text-[var(--text-ghost)] text-sm mb-6">Try adjusting your filters</p>
               <button
-                onClick={() => { setCategory('all'); setOnlyInStock(false); }}
+                onClick={() => setCategory('all')}
                 className="border border-white/15 text-[var(--text-muted)] text-sm uppercase tracking-wider px-6 py-2.5 rounded hover:border-[rgba(201,168,76,0.4)] hover:text-[var(--gold-light)] transition-all"
               >
                 Clear Filters
