@@ -29,21 +29,21 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-10 h-[76px] transition-all duration-500 ${
+        className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 sm:px-10 h-[84px] sm:h-[92px] transition-all duration-500 ${
           scrolled || isShop
             ? 'bg-[var(--bg-2)]/95 backdrop-blur-xl border-b border-[var(--border)]'
             : ''
         }`}
       >
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 group">
+        <Link to="/" className="flex items-center gap-3 sm:gap-3.5 group">
           <img
             src="/logo.jpeg"
             alt="LUM NG"
-            className="w-9 h-9 rounded-full object-cover border border-[var(--gold-dim)] group-hover:border-[var(--gold)] transition-all"
+            className="w-11 h-11 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-[var(--gold-dim)] group-hover:border-[var(--gold)] transition-all"
           />
           <span
-            className="font-[Playfair_Display] text-xl font-black tracking-widest hidden sm:block"
+            className="font-[Playfair_Display] text-2xl sm:text-3xl font-black tracking-[0.18em] hidden sm:block"
             style={{ background: 'linear-gradient(135deg, var(--text), var(--gold-light))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
           >
             LUM NG

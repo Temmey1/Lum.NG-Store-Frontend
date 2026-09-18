@@ -12,7 +12,9 @@ import { productsApi } from '../api/index';
 // from here.
 export const useProductsStore = create((set, get) => ({
   products: [],
+  categories: [],
   loaded: false,
+  categoriesLoaded: false,
   loading: false,
   error: null,
 
@@ -24,6 +26,15 @@ export const useProductsStore = create((set, get) => ({
       set({ products: data.products ?? [], loaded: true, loading: false });
     } catch (err) {
       set({ loading: false, error: err.message || 'Failed to load products' });
+    }
+  },
+
+  fetchCategories: async () => {
+    try {
+      const { data } = await productsApi.getCategories();
+      set({ categories: data.categories ?? [], categoriesLoaded: true });
+    } catch {
+      set({ categoriesLoaded: true });
     }
   },
 

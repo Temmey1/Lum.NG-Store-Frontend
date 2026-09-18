@@ -31,7 +31,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden pt-24 pb-20">
+    <section className="relative min-h-screen flex items-center overflow-hidden pt-28 sm:pt-32 pb-20">
       {/* Cursor glow */}
       <div
         ref={glowRef}
