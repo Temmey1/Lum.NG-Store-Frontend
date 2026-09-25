@@ -11,10 +11,12 @@ export default function ProductModal() {
   const { addItem } = useCartStore();
   const modalProduct = useProductsStore(s => s.products.find(p => p.id === modalProductId) || null);
   const [qty, setQty] = useState(1);
+  const [activeImg, setActiveImg] = useState(0);
 
   useEffect(() => {
     if (modalProduct) {
       setQty(modalProduct.minOrder || 1);
+      setActiveImg(0);
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -23,6 +25,8 @@ export default function ProductModal() {
   }, [modalProduct]);
 
   if (!modalProduct) return null;
+
+  const galleryImages = modalProduct.images?.length ? modalProduct.images : (modalProduct.imageUrl ? [modalProduct.imageUrl] : []);
 
   const isBulk = qty >= (modalProduct.bulkMin || Infinity);
   const unitPrice = isBulk ? modalProduct.bulkPrice : modalProduct.price;
@@ -62,9 +66,34 @@ export default function ProductModal() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2">
             {/* Swatch */}
-            <div className="h-[280px] sm:h-full min-h-[280px] rounded-tl-xl rounded-tr-xl sm:rounded-tr-none sm:rounded-bl-xl overflow-hidden">
-              <ProductImage product={modalProduct} />
+            <div className="relative h-[280px] sm:h-full min-h-[280px] rounded-tl-xl rounded-tr-xl sm:rounded-tr-none sm:rounded-bl-xl overflow-hidden">
+              <ProductImage product={modalProduct} index={activeImg} />
+              {galleryImages.length > 1 && (
+                <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
+                  {galleryImages.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setActiveImg(i)}
+                      aria-label={`Show image ${i + 1}`}
+                      className={`w-2 h-2 rounded-full transition-all ${i === activeImg ? 'bg-white w-5' : 'bg-white/40 hover:bg-white/70'}`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
+            {galleryImages.length > 1 && (
+              <div className="sm:hidden flex gap-2 px-9 pt-4 overflow-x-auto">
+                {galleryImages.map((url, i) => (
+                  <button
+                    key={url + i}
+                    onClick={() => setActiveImg(i)}
+                    className={`w-14 h-14 rounded-md overflow-hidden flex-shrink-0 border-2 transition-all ${i === activeImg ? 'border-[var(--gold)]' : 'border-transparent opacity-60'}`}
+                  >
+                    <ProductImage product={modalProduct} index={i} />
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Info */}
             <div className="p-9">
