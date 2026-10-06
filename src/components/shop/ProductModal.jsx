@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
+import { X, Plus, Minus, ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useUIStore, useCartStore, useProductsStore } from '../../store';
 import { formatPrice } from '../../data/products';
 import toast from 'react-hot-toast';
@@ -24,9 +24,24 @@ export default function ProductModal() {
     return () => { document.body.style.overflow = ''; };
   }, [modalProduct]);
 
-  if (!modalProduct) return null;
+  const galleryImages = modalProduct
+    ? (modalProduct.images?.length ? modalProduct.images : (modalProduct.imageUrl ? [modalProduct.imageUrl] : []))
+    : [];
 
-  const galleryImages = modalProduct.images?.length ? modalProduct.images : (modalProduct.imageUrl ? [modalProduct.imageUrl] : []);
+  const goPrev = () => setActiveImg(i => (i - 1 + galleryImages.length) % galleryImages.length);
+  const goNext = () => setActiveImg(i => (i + 1) % galleryImages.length);
+
+  useEffect(() => {
+    if (!modalProduct || galleryImages.length < 2) return;
+    const onKey = (e) => {
+      if (e.key === 'ArrowLeft') goPrev();
+      if (e.key === 'ArrowRight') goNext();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [modalProduct, galleryImages.length]);
+
+  if (!modalProduct) return null;
 
   const isBulk = qty >= (modalProduct.bulkMin || Infinity);
   const unitPrice = isBulk ? modalProduct.bulkPrice : modalProduct.price;
@@ -66,19 +81,45 @@ export default function ProductModal() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2">
             {/* Swatch */}
-            <div className="relative h-[280px] sm:h-full min-h-[280px] rounded-tl-xl rounded-tr-xl sm:rounded-tr-none sm:rounded-bl-xl overflow-hidden">
+            <div className="relative h-[280px] sm:h-full min-h-[280px] rounded-tl-xl rounded-tr-xl sm:rounded-tr-none sm:rounded-bl-xl overflow-hidden group">
               <ProductImage product={modalProduct} index={activeImg} />
+
               {galleryImages.length > 1 && (
-                <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
-                  {galleryImages.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setActiveImg(i)}
-                      aria-label={`Show image ${i + 1}`}
-                      className={`w-2 h-2 rounded-full transition-all ${i === activeImg ? 'bg-white w-5' : 'bg-white/40 hover:bg-white/70'}`}
-                    />
-                  ))}
-                </div>
+                <>
+                  <button
+                    onClick={goPrev}
+                    aria-label="Previous image"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/65 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <button
+                    onClick={goNext}
+                    aria-label="Next image"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/65 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+
+                  {/* Small galleries: tappable dots. Large ones (this can run up to 40
+                      images): a compact counter instead — 40 dots would be unusable. */}
+                  {galleryImages.length <= 10 ? (
+                    <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
+                      {galleryImages.map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setActiveImg(i)}
+                          aria-label={`Show image ${i + 1}`}
+                          className={`w-2 h-2 rounded-full transition-all ${i === activeImg ? 'bg-white w-5' : 'bg-white/40 hover:bg-white/70'}`}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 text-white text-[11px] font-medium px-2.5 py-1 rounded-full tabular-nums">
+                      {activeImg + 1} / {galleryImages.length}
+                    </div>
+                  )}
+                </>
               )}
             </div>
             {galleryImages.length > 1 && (

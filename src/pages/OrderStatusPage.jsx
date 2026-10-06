@@ -94,7 +94,7 @@ export default function OrderStatusPage() {
               <div key={i} className="flex items-center gap-3 bg-[var(--bg-3)] border border-[var(--border)] rounded-lg p-3">
                 <div className="w-11 h-11 rounded-md flex-shrink-0 overflow-hidden">
                   {src
-                    ? <img src={src} alt={item.name} className="w-full h-full object-cover" />
+                    ? <img src={src} alt={item.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                     : <div className="w-full h-full" style={{ background: item.pattern }} />
                   }
                 </div>

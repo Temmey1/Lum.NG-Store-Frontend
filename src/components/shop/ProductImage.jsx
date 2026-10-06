@@ -21,6 +21,7 @@ export default function ProductImage({ product, index = 0, className = '' }) {
         alt={product?.name || ''}
         className={`w-full h-full object-cover ${className}`}
         loading="lazy"
+        decoding="async"
         onError={() => setFailed(true)}
       />
     );
