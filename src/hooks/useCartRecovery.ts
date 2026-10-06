@@ -21,7 +21,7 @@ export function getSessionId(): string {
 }
 
 // ─── Build cart snapshot for the API ────────────────────────
-function buildSnapshot(items: { id: number; qty: number }[]) {
+function buildSnapshot(items: { id: number; qty: number; selectedImage?: string | null }[]) {
   const products = useProductsStore.getState().products;
   return items.map(item => {
     const p = products.find(p => p.id === item.id);
@@ -35,6 +35,7 @@ function buildSnapshot(items: { id: number; qty: number }[]) {
       price,
       unit:    p.unit,
       pattern: p.pattern,
+      selectedImage: item.selectedImage || null,
     };
   }).filter(Boolean);
 }
@@ -57,7 +58,7 @@ export function useCartRecovery() {
 
         clearCart();
         (data.items as any[]).forEach(item => {
-          if (item.id && item.qty) addItem(item.id, item.qty);
+          if (item.id && item.qty) addItem(item.id, item.qty, item.selectedImage || null);
         });
 
         toast.success('Your cart has been restored! 🛍', {

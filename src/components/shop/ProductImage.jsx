@@ -8,10 +8,15 @@ import { resolveImageUrl } from '../../api/index';
  * imageUrl field for products not yet re-saved since multi-image support
  * was added). Falls back to the CSS gradient pattern when there's no image
  * at all, or if the image URL fails to actually load.
+ *
+ * Pass `overrideUrl` to force a specific image regardless of `index` — used
+ * for cart/checkout rows where a customer picked a particular gallery photo
+ * for their order (cart item's `selectedImage`), so the thumbnail shown
+ * matches what they chose rather than always the product's default.
  */
-export default function ProductImage({ product, index = 0, className = '' }) {
+export default function ProductImage({ product, index = 0, overrideUrl = null, className = '' }) {
   const [failed, setFailed] = useState(false);
-  const url = product?.images?.[index] ?? (index === 0 ? product?.imageUrl : null);
+  const url = overrideUrl ?? (product?.images?.[index] ?? (index === 0 ? product?.imageUrl : null));
   const src = resolveImageUrl(url);
 
   if (src && !failed) {

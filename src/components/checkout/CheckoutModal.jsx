@@ -6,6 +6,7 @@ import { useCartRecovery } from '../../hooks/useCartRecovery';
 import { ordersApi } from '../../api/index';
 import { formatPrice, NIGERIAN_STATES } from '../../data/products';
 import toast from 'react-hot-toast';
+import ProductImage from '../shop/ProductImage';
 
 const STEPS = ['Your Details', 'Delivery', 'Review'];
 
@@ -101,7 +102,7 @@ export default function CheckoutModal() {
         landmark:  form.landmark,
         pickupDate: form.pickupDate,
       },
-      items:       items.map(i => ({ id: i.id, qty: i.qty })),
+      items:       items.map(i => ({ id: i.id, qty: i.qty, selectedImage: i.selectedImage || null })),
       delivery:    deliveryMode,
       subtotal,
       deliveryFee,
@@ -118,7 +119,7 @@ export default function CheckoutModal() {
         items: items.map(item => {
           const p = products.find(x => x.id === item.id);
           const price = p ? (item.qty >= (p.bulkMin || Infinity) ? p.bulkPrice : p.price) : 0;
-          return { name: p?.name || 'Item', qty: item.qty, unit: p?.unit || '', price };
+          return { name: p?.name || 'Item', qty: item.qty, unit: p?.unit || '', price, selectedImage: item.selectedImage || null };
         }),
         customer: { ...form },
         delivery: deliveryMode,
@@ -373,7 +374,7 @@ export default function CheckoutModal() {
                       const price = item.qty >= (p.bulkMin || Infinity) ? p.bulkPrice : p.price;
                       return (
                         <div key={item.id} className="flex items-center gap-4 bg-[var(--bg-3)] border border-[var(--border)] rounded-lg p-4">
-                          <div className="w-12 h-12 rounded-md flex-shrink-0" style={{ background: p.pattern }} />
+                          <div className="w-12 h-12 rounded-md flex-shrink-0 overflow-hidden"><ProductImage product={p} overrideUrl={item.selectedImage} /></div>
                           <div className="flex-1">
                             <div className="text-sm font-semibold">{p.name}</div>
                             <div className="text-[12px] text-[var(--text-ghost)]">{item.qty} × {p.unit}</div>

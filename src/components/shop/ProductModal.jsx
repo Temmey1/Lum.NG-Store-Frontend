@@ -48,7 +48,10 @@ export default function ProductModal() {
   const total = unitPrice * qty;
 
   const handleAdd = () => {
-    addItem(modalProduct.id, qty);
+    // Whichever photo is active in the gallery right now is the one the
+    // customer sees — that's the fabric shot carried through to their order.
+    const selectedImage = galleryImages[activeImg] || null;
+    addItem(modalProduct.id, qty, selectedImage);
     toast.success(`${qty} × ${modalProduct.name} added`, {
       style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(201,168,76,0.3)' },
       iconTheme: { primary: '#c9a84c', secondary: '#000' },
@@ -149,6 +152,15 @@ export default function ProductModal() {
                 <div className="inline-block text-[13px] text-[var(--gold)] bg-[rgba(201,168,76,0.1)] border border-[rgba(201,168,76,0.3)] px-3 py-2 rounded mb-5">
                   🏷 Bulk ({modalProduct.bulkMin}+): {formatPrice(modalProduct.bulkPrice)}/unit
                   {isBulk && <span className="ml-2 text-green-400 text-[11px]">✓ Applied</span>}
+                </div>
+              )}
+
+              {/* Lets the customer know the photo currently showing is the
+                  one that travels with their order — relevant once a product
+                  has more than one fabric photo to choose between. */}
+              {galleryImages.length > 1 && (
+                <div className="text-[12px] text-[var(--text-ghost)] mb-4 -mt-1">
+                  Showing photo {activeImg + 1} of {galleryImages.length} — this is the one we'll use for your order.
                 </div>
               )}
 

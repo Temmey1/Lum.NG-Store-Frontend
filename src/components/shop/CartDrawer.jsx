@@ -64,7 +64,7 @@ export default function CartDrawer() {
                       initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
                       className="flex gap-4 bg-[var(--bg-3)] border border-[var(--border)] rounded-lg p-4"
                     >
-                      <div className="w-[60px] h-[60px] rounded-md flex-shrink-0 overflow-hidden"><ProductImage product={p} /></div>
+                      <div className="w-[60px] h-[60px] rounded-md flex-shrink-0 overflow-hidden"><ProductImage product={p} overrideUrl={item.selectedImage} /></div>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-semibold text-[var(--text)] truncate">{p.name}</div>
                         <div className="text-sm text-[var(--gold-light)] mt-0.5 flex items-center gap-2">

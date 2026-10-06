@@ -47,13 +47,22 @@ export const useCartStore = create(
     (set, get) => ({
       items: [],
 
-      addItem: (productId, qty = 1) => {
+      // `selectedImage`: the specific gallery photo the customer picked for
+      // this fabric (from ProductModal's gallery) — carried through to
+      // checkout/order creation so the vendor sees exactly the photo the
+      // customer meant, instead of just the product's default image.
+      // Optional — null/undefined falls back to the product's default.
+      addItem: (productId, qty = 1, selectedImage = null) => {
         const items = get().items;
         const existing = items.find(i => i.id === productId);
         if (existing) {
-          set({ items: items.map(i => i.id === productId ? { ...i, qty: i.qty + qty } : i) });
+          set({
+            items: items.map(i => i.id === productId
+              ? { ...i, qty: i.qty + qty, selectedImage: selectedImage ?? i.selectedImage ?? null }
+              : i),
+          });
         } else {
-          set({ items: [...items, { id: productId, qty }] });
+          set({ items: [...items, { id: productId, qty, selectedImage: selectedImage ?? null }] });
         }
       },
 
